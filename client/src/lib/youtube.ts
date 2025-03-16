@@ -1,22 +1,106 @@
 import { type YouTubeSearchResult, AudioQuality } from "@shared/schema";
 import { apiRequest } from "./queryClient";
 
+// Check if we're on GitHub Pages or similar static hosting
+const isStaticHosting = window.location.hostname.includes('github.io') || 
+                       window.location.hostname.includes('.pages.dev');
+
 // Function to search YouTube videos
 export async function searchYouTubeVideos(query: string): Promise<YouTubeSearchResult[]> {
   if (!query.trim()) {
     return [];
   }
   
-  const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
-    credentials: "include",
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Error searching videos: ${response.statusText}`);
+  // If we're on GitHub Pages, use direct YouTube API
+  if (isStaticHosting) {
+    const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+    if (!API_KEY) {
+      console.error("YouTube API key not found in environment variables");
+      return [];
+    }
+    
+    try {
+      // Search for videos
+      const searchResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&key=${API_KEY}`
+      );
+      
+      if (!searchResponse.ok) {
+        throw new Error(`YouTube API error: ${searchResponse.statusText}`);
+      }
+      
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.items || !searchData.items.length) {
+        return [];
+      }
+      
+      // Get video details for statistics and duration
+      const videoIds = searchData.items.map((item: any) => item.id.videoId).join(',');
+      const detailsResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${API_KEY}`
+      );
+      
+      if (!detailsResponse.ok) {
+        throw new Error(`YouTube API error: ${detailsResponse.statusText}`);
+      }
+      
+      const detailsData = await detailsResponse.json();
+      
+      // Combine the results
+      return searchData.items.map((item: any) => {
+        const details = detailsData.items.find(
+          (detail: any) => detail.id === item.id.videoId
+        );
+        
+        return {
+          id: {
+            videoId: item.id.videoId
+          },
+          snippet: {
+            title: item.snippet.title,
+            channelTitle: item.snippet.channelTitle,
+            publishedAt: item.snippet.publishedAt,
+            thumbnails: {
+              medium: {
+                url: item.snippet.thumbnails.medium.url
+              },
+              high: {
+                url: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium.url
+              }
+            }
+          },
+          statistics: {
+            viewCount: details?.statistics?.viewCount || "0"
+          },
+          contentDetails: {
+            duration: details?.contentDetails?.duration || "PT0M0S"
+          }
+        };
+      });
+    } catch (error) {
+      console.error("Error searching YouTube:", error);
+      return [];
+    }
+  } else {
+    // Use the backend API when running on Replit
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error searching videos: ${response.statusText}`);
+    }
+    
+    return response.json();
   }
-  
-  return response.json();
 }
+
+// In-memory storage for static hosting (GitHub Pages)
+const staticStorage = {
+  recentTracks: [],
+  preferences: { audioQuality: "medium" as AudioQuality, volume: 70 }
+};
 
 // Function to add a track to recently played
 export async function addRecentTrack(trackData: {
@@ -26,43 +110,126 @@ export async function addRecentTrack(trackData: {
   thumbnailUrl: string;
   duration: number;
 }) {
-  return apiRequest("POST", "/api/tracks/recent", trackData);
+  if (isStaticHosting) {
+    // For GitHub Pages, store in memory or localStorage
+    const track = {
+      id: Date.now(),
+      ...trackData
+    };
+    
+    // Add to beginning of array, keep only last 20 tracks
+    staticStorage.recentTracks = [track, ...staticStorage.recentTracks.slice(0, 19)];
+    
+    // Optionally persist to localStorage
+    try {
+      localStorage.setItem('hearit_recent_tracks', JSON.stringify(staticStorage.recentTracks));
+    } catch (e) {
+      console.warn('Could not save recent tracks to localStorage', e);
+    }
+    
+    return track;
+  } else {
+    // For Replit, use the server API
+    return apiRequest("POST", "/api/tracks/recent", trackData);
+  }
 }
 
 // Function to get recently played tracks
 export async function getRecentTracks() {
-  const response = await fetch("/api/tracks/recent", {
-    credentials: "include",
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Error fetching recent tracks: ${response.statusText}`);
+  if (isStaticHosting) {
+    // For GitHub Pages, get from memory or localStorage
+    // Try to load from localStorage first
+    try {
+      const savedTracks = localStorage.getItem('hearit_recent_tracks');
+      if (savedTracks) {
+        staticStorage.recentTracks = JSON.parse(savedTracks);
+      }
+    } catch (e) {
+      console.warn('Could not load recent tracks from localStorage', e);
+    }
+    
+    return staticStorage.recentTracks;
+  } else {
+    // For Replit, use the server API
+    const response = await fetch("/api/tracks/recent", {
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error fetching recent tracks: ${response.statusText}`);
+    }
+    
+    return response.json();
   }
-  
-  return response.json();
 }
 
 // Function to update audio quality preference
 export async function updateAudioQuality(quality: AudioQuality) {
-  return apiRequest("PATCH", "/api/preferences/quality", { quality });
+  if (isStaticHosting) {
+    // For GitHub Pages, store in memory or localStorage
+    staticStorage.preferences.audioQuality = quality;
+    
+    // Persist to localStorage
+    try {
+      localStorage.setItem('hearit_preferences', JSON.stringify(staticStorage.preferences));
+    } catch (e) {
+      console.warn('Could not save preferences to localStorage', e);
+    }
+    
+    return staticStorage.preferences;
+  } else {
+    // For Replit, use the server API
+    return apiRequest("PATCH", "/api/preferences/quality", { quality });
+  }
 }
 
 // Function to update volume preference
 export async function updateVolume(volume: number) {
-  return apiRequest("PATCH", "/api/preferences/volume", { volume });
+  if (isStaticHosting) {
+    // For GitHub Pages, store in memory or localStorage
+    staticStorage.preferences.volume = volume;
+    
+    // Persist to localStorage
+    try {
+      localStorage.setItem('hearit_preferences', JSON.stringify(staticStorage.preferences));
+    } catch (e) {
+      console.warn('Could not save preferences to localStorage', e);
+    }
+    
+    return staticStorage.preferences;
+  } else {
+    // For Replit, use the server API
+    return apiRequest("PATCH", "/api/preferences/volume", { volume });
+  }
 }
 
 // Function to get user preferences
 export async function getUserPreferences() {
-  const response = await fetch("/api/preferences", {
-    credentials: "include",
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Error fetching preferences: ${response.statusText}`);
+  if (isStaticHosting) {
+    // For GitHub Pages, get from memory or localStorage
+    // Try to load from localStorage first
+    try {
+      const savedPreferences = localStorage.getItem('hearit_preferences');
+      if (savedPreferences) {
+        staticStorage.preferences = JSON.parse(savedPreferences);
+      }
+    } catch (e) {
+      console.warn('Could not load preferences from localStorage', e);
+    }
+    
+    return staticStorage.preferences;
+  } else {
+    // For Replit, use the server API
+    const response = await fetch("/api/preferences", {
+      credentials: "include",
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error fetching preferences: ${response.statusText}`);
+    }
+    
+    return response.json();
   }
-  
-  return response.json();
 }
 
 // Convert YouTube duration string (ISO 8601) to seconds
