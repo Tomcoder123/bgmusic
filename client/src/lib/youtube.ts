@@ -97,9 +97,20 @@ export async function searchYouTubeVideos(query: string): Promise<YouTubeSearchR
 }
 
 // In-memory storage for static hosting (GitHub Pages)
-const staticStorage = {
+const staticStorage: {
+  recentTracks: Array<{
+    id: number;
+    youtubeId: string;
+    title: string;
+    artist: string;
+    thumbnailUrl: string;
+    duration: number;
+    addedAt?: string;
+  }>;
+  preferences: { audioQuality: AudioQuality; volume: number };
+} = {
   recentTracks: [],
-  preferences: { audioQuality: "medium" as AudioQuality, volume: 70 }
+  preferences: { audioQuality: "medium", volume: 70 }
 };
 
 // Function to add a track to recently played
@@ -114,7 +125,12 @@ export async function addRecentTrack(trackData: {
     // For GitHub Pages, store in memory or localStorage
     const track = {
       id: Date.now(),
-      ...trackData
+      youtubeId: trackData.youtubeId,
+      title: trackData.title,
+      artist: trackData.artist,
+      thumbnailUrl: trackData.thumbnailUrl,
+      duration: trackData.duration,
+      addedAt: new Date().toISOString()
     };
     
     // Add to beginning of array, keep only last 20 tracks
