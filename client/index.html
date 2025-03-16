@@ -11,12 +11,25 @@
     <script>
       // Handle redirect from GitHub Pages 404 page
       (function() {
-        // Check if we need to redirect
-        var redirect = sessionStorage.redirect;
+        // Check if redirected from GitHub Pages 404
+        const redirectParam = new URLSearchParams(window.location.search).get('/');
+        
+        // If we have a redirect parameter (from the 404 page)
+        if (redirectParam) {
+          // Properly format the URL and store it in sessionStorage 
+          // (avoiding issues with query params)
+          const redirectPath = redirectParam.replace(/~and~/g, '&');
+          sessionStorage.redirect = window.location.href.replace(/\?.*/, '') + redirectPath;
+          history.replaceState(null, null, sessionStorage.redirect);
+        }
+        
+        // Check if we have a redirect from session storage (standard redirect)
+        const cachedRedirect = sessionStorage.redirect;
         delete sessionStorage.redirect;
-        // If we were redirected, redirect to the correct URL
-        if (redirect && redirect != location.href) {
-          history.replaceState(null, null, redirect.split('?')[0]);
+        
+        // If we were redirected, go to the right URL
+        if (cachedRedirect && cachedRedirect !== window.location.href) {
+          history.replaceState(null, null, cachedRedirect);
         }
       })();
     </script>
