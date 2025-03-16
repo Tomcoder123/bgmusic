@@ -3,37 +3,37 @@
 # Exit on error
 set -e
 
-echo "Building HearIt APK..."
-echo "======================="
+echo "🔨 Building HearIt Android application..."
 
-# Build the web app
-echo "Step 1: Building web application..."
+# Check if Android SDK is available
+if [ -z "$ANDROID_SDK_ROOT" ]; then
+  echo "⚠️ ANDROID_SDK_ROOT not set. Please ensure Android SDK is installed and ANDROID_SDK_ROOT is set."
+  exit 1
+fi
+
+# Build the web application
+echo "📦 Building web application..."
 npm run build
 
-# Initialize Capacitor if needed
+# Add Android platform if not already added
 if [ ! -d "android" ]; then
-  echo "Step 2: Initializing Capacitor Android project..."
+  echo "🤖 Adding Android platform..."
   npx cap add android
 else
-  echo "Step 2: Android project already exists, updating..."
+  echo "🤖 Android platform already exists."
 fi
 
 # Copy web assets to Android project
-echo "Step 3: Syncing web assets to Android project..."
+echo "🔄 Syncing web assets to Android project..."
 npx cap sync android
 
-echo "Step 4: Creating APK..."
-cd android
-
-# Check if gradlew exists and is executable
-if [ ! -x "./gradlew" ]; then
-  echo "Making gradlew executable..."
-  chmod +x ./gradlew
-fi
-
-# Build debug APK
-./gradlew assembleDebug
-
-echo "======================="
-echo "APK build complete!"
-echo "The APK is located at: android/app/build/outputs/apk/debug/app-debug.apk"
+echo "✅ Build completed successfully!"
+echo "📱 You can now open the Android project in Android Studio:"
+echo "   npx cap open android"
+echo ""
+echo "   Then build the APK from Android Studio: Build > Build Bundle(s) / APK(s) > Build APK(s)"
+echo ""
+echo "   Or use this command to build directly (requires properly configured Android SDK):"
+echo "   cd android && ./gradlew assembleDebug"
+echo ""
+echo "   The APK will be available at: android/app/build/outputs/apk/debug/app-debug.apk"

@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'io.hearit.app',
   appName: 'HearIt',
   webDir: 'dist/public',
-  bundledWebRuntime: false,
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
