@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HearIt</string>
+    <string name="title_activity_main">HearIt</string>
+    <string name="package_name">io.hearit.app</string>
+    <string name="custom_url_scheme">io.hearit.app</string>
+</resources>

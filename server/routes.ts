@@ -5,7 +5,7 @@ import { z } from "zod";
 import { insertTrackSchema, insertUserPreferencesSchema, AudioQuality } from "@shared/schema";
 import axios from "axios";
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || import.meta.env.VITE_YOUTUBE_API_KEY || "";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
