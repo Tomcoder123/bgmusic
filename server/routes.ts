@@ -56,14 +56,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const details = videoDetails.data.items.find(
           (detail: any) => detail.id === item.id.videoId
         );
+        
+        // Format response to match YouTubeSearchResult interface in schema.ts
         return {
-          videoId: item.id.videoId,
-          title: item.snippet.title,
-          channelTitle: item.snippet.channelTitle,
-          thumbnailUrl: item.snippet.thumbnails.medium.url,
-          publishedAt: item.snippet.publishedAt,
-          viewCount: details?.statistics?.viewCount || "0",
-          duration: details?.contentDetails?.duration || "PT0M0S",
+          id: {
+            videoId: item.id.videoId
+          },
+          snippet: {
+            title: item.snippet.title,
+            channelTitle: item.snippet.channelTitle,
+            publishedAt: item.snippet.publishedAt,
+            thumbnails: {
+              medium: {
+                url: item.snippet.thumbnails.medium.url
+              },
+              high: {
+                url: item.snippet.thumbnails.high.url || item.snippet.thumbnails.medium.url
+              }
+            }
+          },
+          statistics: {
+            viewCount: details?.statistics?.viewCount || "0"
+          },
+          contentDetails: {
+            duration: details?.contentDetails?.duration || "PT0M0S"
+          }
         };
       });
 
