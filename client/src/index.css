@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 265 75% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 270 100% 71%;
+    --primary-dark: 260 75% 45%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 298 54% 42%;
+    --accent-foreground: 0 0% 100%;
+    --success: 142 70% 42%;
+    --success-foreground: 0 0% 100%;
+    --destructive: 0 100% 65%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 265 75% 65%;
+    --radius: 0.5rem;
+  }
+
+  .player-progress {
+    position: relative;
+    height: 4px;
+    width: 100%;
+    background-color: hsl(0, 0%, 30%);
+  }
+  
+  .progress-bar {
+    position: absolute;
+    height: 100%;
+    background-color: hsl(var(--primary));
+    transition: width 0.1s linear;
+  }
+  
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: -4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+  }
+  
+  .player-progress:hover .progress-bar::after {
+    transform: scale(1);
+  }
+
+  .quality-option.active {
+    background-color: hsl(var(--primary));
+    color: white;
+  }
+  
+  .player-controls button {
+    transition: transform 0.2s ease;
+  }
+  
+  .player-controls button:active {
+    transform: scale(0.9);
+  }
+
+  /* Hide scrollbar while keeping functionality */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
