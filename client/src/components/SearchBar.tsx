@@ -8,6 +8,7 @@ interface SearchBarProps {
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showClearButton, setShowClearButton] = useState(false);
+  const [focused, setFocused] = useState(false);
   
   useEffect(() => {
     setShowClearButton(searchQuery.length > 0);
@@ -28,24 +29,38 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
   };
   
   return (
-    <div className="px-4 py-3 bg-card shadow-sm">
-      <div className="relative">
+    <div className="px-6 py-3">
+      <div className="relative max-w-xl mx-auto">
         <input 
           type="text" 
           placeholder="Search for songs, artists, or albums" 
-          className="w-full bg-muted pl-10 pr-4 py-2 rounded-full text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          className={`w-full bg-secondary/70 pl-10 pr-4 py-2.5 rounded-lg text-sm text-foreground 
+                     focus:outline-none border-0 transition-all duration-300
+                     ${focused ? 'ring-2 ring-primary/50 bg-secondary' : ''}`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
         />
-        <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute left-3 top-3 h-4.5 w-4.5 text-primary opacity-70" />
         {showClearButton && (
           <button 
-            className="absolute right-3 top-2.5 text-muted-foreground"
+            className="absolute right-3 top-2.5 bg-muted rounded-full p-0.5
+                      text-muted-foreground hover:bg-secondary transition-colors"
             onClick={handleClear}
+            aria-label="Clear search"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         )}
+      </div>
+      
+      {/* Apple Music style search filters */}
+      <div className="flex justify-center space-x-4 mt-3 text-xs font-medium">
+        <button className="apple-button text-xs py-1 px-3">Songs</button>
+        <button className="text-muted-foreground hover:text-foreground transition-colors">Artists</button>
+        <button className="text-muted-foreground hover:text-foreground transition-colors">Albums</button>
+        <button className="text-muted-foreground hover:text-foreground transition-colors">Playlists</button>
       </div>
     </div>
   );

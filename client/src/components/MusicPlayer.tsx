@@ -1,6 +1,11 @@
-import { useContext, useState, useRef, useEffect } from "react";
+import { useContext, useRef } from "react";
 import { PlayerContext } from "@/context/PlayerContext";
-import { Pause, Play, SkipBack, SkipForward, Volume1, Volume2, VolumeX } from "lucide-react";
+import { 
+  Pause, Play, SkipBack, SkipForward, 
+  Volume1, Volume2, VolumeX, 
+  Heart, ListMusic, MonitorSpeaker,
+  Repeat, Shuffle
+} from "lucide-react";
 import { formatDuration } from "@/lib/youtube";
 import { useMutation } from "@tanstack/react-query";
 import { updateVolume } from "@/lib/youtube";
@@ -53,15 +58,15 @@ export default function MusicPlayer() {
   
   // Get the appropriate volume icon based on volume level
   const getVolumeIcon = () => {
-    if (isMuted || volume === 0) return <VolumeX />;
-    if (volume < 50) return <Volume1 />;
-    return <Volume2 />;
+    if (isMuted || volume === 0) return <VolumeX size={18} />;
+    if (volume < 50) return <Volume1 size={18} />;
+    return <Volume2 size={18} />;
   };
   
   if (!currentTrack) return null;
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-muted shadow-lg z-10">
+    <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border shadow-lg z-10">
       {/* Progress bar */}
       <div 
         className="player-progress cursor-pointer" 
@@ -74,17 +79,11 @@ export default function MusicPlayer() {
         ></div>
       </div>
       
-      {/* Time info */}
-      <div className="flex justify-between px-4 text-xs text-muted-foreground py-1">
-        <span>{formatDuration(progress)}</span>
-        <span>{formatDuration(duration)}</span>
-      </div>
-      
-      {/* Controls */}
-      <div className="px-4 py-3 flex items-center">
-        {/* Track info (small screens) */}
-        <div className="md:hidden flex items-center flex-1 min-w-0 mr-4">
-          <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 mr-3">
+      {/* Apple Music style player */}
+      <div className="px-6 py-4 flex items-center gap-4">
+        {/* Track info with artwork */}
+        <div className="flex items-center min-w-0 pr-4 border-r border-border">
+          <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 mr-3 shadow-md">
             <img 
               src={currentTrack.thumbnailUrl} 
               alt="Now playing" 
@@ -95,49 +94,73 @@ export default function MusicPlayer() {
             <h3 className="text-sm font-medium truncate">{currentTrack.title}</h3>
             <p className="text-xs text-muted-foreground truncate">{currentTrack.artist}</p>
           </div>
-        </div>
-        
-        {/* Player controls */}
-        <div className="player-controls flex justify-center items-center flex-1">
-          <button 
-            className="p-2 text-muted-foreground hover:text-foreground"
-            // Skip functionality would be added in a more complete implementation
-            // onClick={() => skipPrevious()}
-          >
-            <SkipBack />
-          </button>
-          <button 
-            className="p-2 mx-2 text-white bg-primary rounded-full w-12 h-12 flex items-center justify-center hover:bg-primary-light"
-            onClick={togglePlay}
-          >
-            {isPlaying ? <Pause /> : <Play />}
-          </button>
-          <button 
-            className="p-2 text-muted-foreground hover:text-foreground"
-            // Skip functionality would be added in a more complete implementation
-            // onClick={() => skipNext()}
-          >
-            <SkipForward />
+          <button className="ml-4 text-muted-foreground hover:text-primary transition-colors">
+            <Heart size={16} />
           </button>
         </div>
         
-        {/* Volume controls (shows on larger screens) */}
-        <div className="hidden md:flex items-center space-x-2 flex-1 justify-end">
-          <button 
-            className="p-2 text-muted-foreground hover:text-foreground"
-            onClick={toggleMute}
-          >
-            {getVolumeIcon()}
+        {/* Main player controls */}
+        <div className="flex flex-col items-center flex-1">
+          {/* Control buttons */}
+          <div className="player-controls flex items-center space-x-4">
+            <button className="text-muted-foreground hover:text-foreground transition-colors">
+              <Shuffle size={16} />
+            </button>
+            <button 
+              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <SkipBack size={22} />
+            </button>
+            <button 
+              className="p-2 mx-1 text-white bg-primary rounded-full w-10 h-10 flex items-center justify-center hover:bg-primary-light"
+              onClick={togglePlay}
+            >
+              {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+            </button>
+            <button 
+              className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <SkipForward size={22} />
+            </button>
+            <button className="text-muted-foreground hover:text-foreground transition-colors">
+              <Repeat size={16} />
+            </button>
+          </div>
+          
+          {/* Time indicator */}
+          <div className="flex justify-between w-full text-xs text-muted-foreground mt-1.5">
+            <span>{formatDuration(progress)}</span>
+            <span>{formatDuration(duration)}</span>
+          </div>
+        </div>
+        
+        {/* Right side controls - volume and extras */}
+        <div className="flex items-center space-x-5 border-l border-border pl-4">
+          <button className="text-muted-foreground hover:text-foreground transition-colors">
+            <ListMusic size={18} />
           </button>
-          <div 
-            className="w-24 h-1 bg-muted rounded-full overflow-hidden cursor-pointer"
-            onClick={handleVolumeClick}
-            ref={volumeBarRef}
-          >
+          <button className="text-muted-foreground hover:text-foreground transition-colors">
+            <MonitorSpeaker size={18} />
+          </button>
+          
+          {/* Volume control */}
+          <div className="flex items-center space-x-2">
+            <button 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              onClick={toggleMute}
+            >
+              {getVolumeIcon()}
+            </button>
             <div 
-              className="h-full bg-primary" 
-              style={{ width: `${isMuted ? 0 : volume}%` }}
-            ></div>
+              className="w-24 h-1.5 bg-muted rounded-full overflow-hidden cursor-pointer"
+              onClick={handleVolumeClick}
+              ref={volumeBarRef}
+            >
+              <div 
+                className="h-full bg-primary" 
+                style={{ width: `${isMuted ? 0 : volume}%` }}
+              ></div>
+            </div>
           </div>
         </div>
       </div>
