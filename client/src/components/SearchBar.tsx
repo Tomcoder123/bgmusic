@@ -55,12 +55,9 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         )}
       </div>
       
-      {/* Apple Music style search filters */}
-      <div className="flex justify-center space-x-4 mt-3 text-xs font-medium">
+      {/* Apple Music style search filters - simplified to focus on songs only */}
+      <div className="flex justify-center mt-3 text-xs font-medium">
         <button className="apple-button text-xs py-1 px-3">Songs</button>
-        <button className="text-muted-foreground hover:text-foreground transition-colors">Artists</button>
-        <button className="text-muted-foreground hover:text-foreground transition-colors">Albums</button>
-        <button className="text-muted-foreground hover:text-foreground transition-colors">Playlists</button>
       </div>
     </div>
   );

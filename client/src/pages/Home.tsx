@@ -4,7 +4,6 @@ import SearchBar from "@/components/SearchBar";
 import CurrentlyPlaying from "@/components/CurrentlyPlaying";
 import RecentlyPlayed from "@/components/RecentlyPlayed";
 import SearchResults from "@/components/SearchResults";
-import Playlists from "@/components/Playlists";
 import MusicPlayer from "@/components/MusicPlayer";
 import { useContext } from "react";
 import { PlayerContext } from "@/context/PlayerContext";
@@ -25,9 +24,8 @@ export default function Home() {
       {/* Main content area with overflow */}
       <main className="flex-1 overflow-y-auto pb-24">
         {currentTrack && <CurrentlyPlaying />}
-        <RecentlyPlayed />
-        <SearchResults searchQuery={searchQuery} />
-        <Playlists />
+        {!searchQuery && <RecentlyPlayed />}
+        {searchQuery && <SearchResults searchQuery={searchQuery} />}
       </main>
       
       <MusicPlayer />
