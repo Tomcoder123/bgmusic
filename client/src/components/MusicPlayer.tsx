@@ -11,6 +11,19 @@ import { useMutation } from "@tanstack/react-query";
 import { updateVolume } from "@/lib/youtube";
 import { queryClient } from "@/lib/queryClient";
 
+// Enable background playback
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play', () => {
+    const playerContext = document.querySelector('audio');
+    if (playerContext) playerContext.play();
+  });
+  
+  navigator.mediaSession.setActionHandler('pause', () => {
+    const playerContext = document.querySelector('audio');
+    if (playerContext) playerContext.pause();
+  });
+}
+
 export default function MusicPlayer() {
   const { 
     currentTrack, 

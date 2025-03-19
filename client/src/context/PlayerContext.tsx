@@ -60,9 +60,9 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [duration, setDuration] = useState(0);
   const [audioQuality, setAudioQualityState] = useState<AudioQuality>("medium");
   const [theme, setTheme] = useState("dark");
-  
+
   const playerRef = useRef<ReactPlayer | null>(null);
-  
+
   // Load user preferences from API
   const { data: preferences } = useQuery({
     queryKey: ["/api/preferences"],
@@ -74,7 +74,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       }
     },
   });
-  
+
   // Track mutation to add played track to history
   const addTrackMutation = useMutation({
     mutationFn: addRecentTrack,
@@ -82,12 +82,12 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tracks/recent"] });
     },
   });
-  
+
   // Play a track and save it to history
   const playTrack = (track: TrackInfo) => {
     setCurrentTrack(track);
     setIsPlaying(true);
-    
+
     // Add to recently played
     addTrackMutation.mutate({
       youtubeId: track.id,
@@ -97,33 +97,33 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       duration: track.duration,
     });
   };
-  
+
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
-  
+
   const toggleMute = () => {
     setIsMuted(!isMuted);
   };
-  
+
   const setVolume = (newVolume: number) => {
     setVolumeState(newVolume);
   };
-  
+
   const seekTo = (seconds: number) => {
     if (playerRef.current) {
       playerRef.current.seekTo(seconds);
     }
   };
-  
+
   const setAudioQuality = (quality: AudioQuality) => {
     setAudioQualityState(quality);
   };
-  
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
-  
+
   // YouTube player config based on quality setting
   const getPlayerConfig = () => {
     const qualityLevels = {
@@ -131,7 +131,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       medium: "medium",
       high: "hd720"
     };
-    
+
     return {
       youtube: {
         playerVars: {
@@ -151,7 +151,22 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       }
     };
   };
-  
+
+  useEffect(() => {
+    if (!playerRef.current) return;
+    playerRef.current.setVolume(volume / 100);
+
+    // Update media session metadata for background playback
+    if ('mediaSession' in navigator && currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.title,
+        artist: currentTrack.artist,
+        artwork: [{ src: currentTrack.thumbnailUrl, sizes: '512x512', type: 'image/jpeg' }]
+      });
+    }
+  }, [volume, currentTrack]);
+
+
   return (
     <PlayerContext.Provider
       value={{
@@ -172,7 +187,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       }}
     >
       {children}
-      
+
       {/* Hidden YouTube player - handles actual playback */}
       {currentTrack && (
         <div className="hidden">
