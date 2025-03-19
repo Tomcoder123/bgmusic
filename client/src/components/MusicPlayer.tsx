@@ -135,7 +135,7 @@ export default function MusicPlayer() {
         </div>
         
         {/* Right side controls - volume and extras */}
-        <div className="flex items-center space-x-5 border-l border-border pl-4">
+        <div className="flex items-center space-x-3 border-l border-border pl-2">
           <button className="text-muted-foreground hover:text-foreground transition-colors">
             <ListMusic size={18} />
           </button>
