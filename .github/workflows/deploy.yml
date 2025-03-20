@@ -20,10 +20,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      # Create static React build only (no server-side code)
+      - name: Build Frontend Only
+        run: |
+          cd client
+          cp index-gh-pages.html index.html
+          npx vite build --base=./ --outDir=../dist
         env:
           VITE_YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          VITE_USE_STATIC_API: 'true'
+      
+      # Create a file to handle GitHub Pages routing
+      - name: Create 404.html for SPA routing
+        run: |
+          cp dist/index.html dist/404.html
+
+      # Create a simple CNAME file if you have a custom domain
+      # - name: Create CNAME file
+      #   run: echo "yourdomain.com" > dist/CNAME
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
