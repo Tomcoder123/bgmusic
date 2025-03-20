@@ -20,6 +20,17 @@ const config: CapacitorConfig = {
       androidScaleType: "CENTER_CROP",
       showSpinner: true,
       androidSpinnerStyle: "large"
+    },
+    // Add background mode configuration for Anuradev plugin
+    BackgroundMode: {
+      enable: true,
+      title: "HearIt",
+      text: "Playing music in background",
+      icon: "notification_icon",
+      color: "#ffffff",
+      resume: true,
+      hidden: false,
+      showWhen: true
     }
   },
   android: {
@@ -27,10 +38,10 @@ const config: CapacitorConfig = {
     captureInput: true,
     backgroundColor: "#ffffff",
     buildOptions: {
-      keystorePath: null,
-      keystorePassword: null,
-      keystoreAlias: null,
-      keystoreAliasPassword: null,
+      keystorePath: undefined,
+      keystorePassword: undefined,
+      keystoreAlias: undefined,
+      keystoreAliasPassword: undefined,
       releaseType: "APK"
     },
     androidXEnabled: true,
