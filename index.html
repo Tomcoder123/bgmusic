@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ff2d55" />
+    <meta name="description" content="HearIt - Premium YouTube Music Player with background playback and audio quality control" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjJkNTUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNOSAxOFY1bDEyLTJ2MTMiPjwvcGF0aD48Y2lyY2xlIGN4PSI2IiBjeT0iMTgiIHI9IjMiPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjE4IiBjeT0iMTYiIHI9IjMiPjwvY2lyY2xlPjwvc3ZnPg==" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>HearIt Music Player</title>
+    <script>
+      // Handle redirect from GitHub Pages 404 page
+      (function() {
+        // Check if redirected from GitHub Pages 404
+        const redirectParam = new URLSearchParams(window.location.search).get('/');
+        
+        // If we have a redirect parameter (from the 404 page)
+        if (redirectParam) {
+          // Properly format the URL and store it in sessionStorage 
+          // (avoiding issues with query params)
+          const redirectPath = redirectParam.replace(/~and~/g, '&');
+          sessionStorage.redirect = window.location.href.replace(/\?.*/, '') + redirectPath;
+          history.replaceState(null, null, sessionStorage.redirect);
+        }
+        
+        // Check if we have a redirect from session storage (standard redirect)
+        const cachedRedirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        
+        // If we were redirected, go to the right URL
+        if (cachedRedirect && cachedRedirect !== window.location.href) {
+          history.replaceState(null, null, cachedRedirect);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
