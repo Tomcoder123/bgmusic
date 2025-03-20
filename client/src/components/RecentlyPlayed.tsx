@@ -48,7 +48,7 @@ export default function RecentlyPlayed() {
     <div className="px-4 mb-6">
       <h2 className="text-lg font-semibold mb-3">Recently Played</h2>
       <div className="flex overflow-x-auto pb-4 gap-4 hide-scrollbar">
-        {recentTracks.map((track) => (
+        {recentTracks.map((track: Track) => (
           <div 
             key={track.id} 
             className="flex-shrink-0 w-40 cursor-pointer transition-transform hover:scale-105"

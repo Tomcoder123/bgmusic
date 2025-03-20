@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { PlayerContext } from "@/context/PlayerContext";
 import { AudioQuality } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
-import { updateAudioQuality } from "@/lib/youtube";
+import { updateAudioQuality } from "@/lib/youtubeApiWrapper";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, Repeat, Shuffle, MoreHorizontal } from "lucide-react";
