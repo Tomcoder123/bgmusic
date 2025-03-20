@@ -6,6 +6,8 @@ import { updateAudioQuality } from "@/lib/youtube";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, Repeat, Shuffle, MoreHorizontal } from "lucide-react";
+import BackgroundModeIndicator from "@/components/BackgroundModeIndicator";
+import { Capacitor } from "@capacitor/core";
 
 export default function CurrentlyPlaying() {
   const { currentTrack, audioQuality, setAudioQuality, isPlaying } = useContext(PlayerContext);
@@ -101,6 +103,13 @@ export default function CurrentlyPlaying() {
           </div>
         </div>
       </div>
+      
+      {/* Background Mode Indicator */}
+      {Capacitor.isNativePlatform() && (
+        <div className="max-w-4xl mx-auto mt-4 flex justify-center">
+          <BackgroundModeIndicator />
+        </div>
+      )}
       
       {/* Apple Music style style divider */}
       <div className="max-w-4xl mx-auto mt-8 border-t border-border"></div>

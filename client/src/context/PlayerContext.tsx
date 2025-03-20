@@ -201,9 +201,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
             onEnded={() => setIsPlaying(false)}
             width="0"
             height="0"
-            config={{
-              youtube: getPlayerConfig()
-            }}
+            playsinline={true}
           />
         </div>
       )}
