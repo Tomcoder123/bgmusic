@@ -6,6 +6,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useBackgroundMode } from "@/hooks/useBackgroundMode";
 import { Capacitor } from "@capacitor/core";
+import { useToast } from "@/hooks/use-toast";
+import { Music } from "lucide-react";
 
 interface TrackInfo {
   id: string;
@@ -62,11 +64,14 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [duration, setDuration] = useState(0);
   const [audioQuality, setAudioQualityState] = useState<AudioQuality>("medium");
   const [theme, setTheme] = useState("dark");
+  const [showedBackgroundToast, setShowedBackgroundToast] = useState(false);
   
   const playerRef = useRef<ReactPlayer | null>(null);
+  const { toast } = useToast();
   
   // Initialize background mode hooks
   const { 
+    isBackgroundModeEnabled,
     enableBackgroundMode, 
     disableBackgroundMode, 
     updateBackgroundNotification 
@@ -114,6 +119,20 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       disableBackgroundMode();
     };
   }, [currentTrack, isPlaying, enableBackgroundMode, disableBackgroundMode, updateBackgroundNotification]);
+  
+  // Show background mode toast when active
+  useEffect(() => {
+    if (isBackgroundModeEnabled && !showedBackgroundToast && Capacitor.isNativePlatform()) {
+      toast({
+        title: "Background Mode Active",
+        description: "Music will continue playing when you minimize the app.",
+        duration: 5000,
+      });
+      setShowedBackgroundToast(true);
+    } else if (!isBackgroundModeEnabled) {
+      setShowedBackgroundToast(false);
+    }
+  }, [isBackgroundModeEnabled, showedBackgroundToast, toast]);
   
   // Play a track and save it to history
   const playTrack = (track: TrackInfo) => {
