@@ -34,19 +34,7 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    allowMixedContent: true,
-    captureInput: true,
-    backgroundColor: "#ffffff",
-    buildOptions: {
-      keystorePath: undefined,
-      keystorePassword: undefined,
-      keystoreAlias: undefined,
-      keystoreAliasPassword: undefined,
-      releaseType: "APK"
-    },
-    androidXEnabled: true,
-    minSdkVersion: 22,
-    targetSdkVersion: 33
+    backgroundColor: "#ffffff"
   }
 };
 

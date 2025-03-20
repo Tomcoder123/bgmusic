@@ -4,6 +4,8 @@ import ReactPlayer from "react-player/youtube";
 import { getUserPreferences, addRecentTrack } from "@/lib/youtube";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import { useBackgroundMode } from "@/hooks/useBackgroundMode";
+import { Capacitor } from "@capacitor/core";
 
 interface TrackInfo {
   id: string;
@@ -63,17 +65,26 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   
   const playerRef = useRef<ReactPlayer | null>(null);
   
+  // Initialize background mode hooks
+  const { 
+    enableBackgroundMode, 
+    disableBackgroundMode, 
+    updateBackgroundNotification 
+  } = useBackgroundMode();
+  
   // Load user preferences from API
   const { data: preferences } = useQuery({
     queryKey: ["/api/preferences"],
-    queryFn: getUserPreferences,
-    onSuccess: (data) => {
-      if (data) {
-        setVolumeState(data.volume);
-        setAudioQualityState(data.audioQuality);
-      }
-    },
+    queryFn: getUserPreferences
   });
+  
+  // Update preferences when available
+  useEffect(() => {
+    if (preferences) {
+      setVolumeState(preferences.volume);
+      setAudioQualityState(preferences.audioQuality);
+    }
+  }, [preferences]);
   
   // Track mutation to add played track to history
   const addTrackMutation = useMutation({
@@ -82,6 +93,27 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tracks/recent"] });
     },
   });
+  
+  // Enable background mode when a track is playing
+  useEffect(() => {
+    if (currentTrack && isPlaying) {
+      enableBackgroundMode();
+      
+      if (Capacitor.isNativePlatform()) {
+        updateBackgroundNotification(
+          currentTrack.title,
+          currentTrack.artist
+        );
+      }
+    } else if (!isPlaying) {
+      disableBackgroundMode();
+    }
+    
+    return () => {
+      // Clean up background mode when component unmounts
+      disableBackgroundMode();
+    };
+  }, [currentTrack, isPlaying, enableBackgroundMode, disableBackgroundMode, updateBackgroundNotification]);
   
   // Play a track and save it to history
   const playTrack = (track: TrackInfo) => {
@@ -124,32 +156,14 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
   
-  // YouTube player config based on quality setting
-  const getPlayerConfig = () => {
+  // Get YouTube quality string based on user preference
+  const getQualityLevel = () => {
     const qualityLevels = {
       low: "small",
       medium: "medium",
       high: "hd720"
     };
-    
-    return {
-      youtube: {
-        playerVars: {
-          // https://developers.google.com/youtube/player_parameters
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          iv_load_policy: 3,
-          modestbranding: 1,
-          rel: 0,
-          playsinline: 1,
-          showinfo: 0,
-          // Set the quality option based on user preference
-          vq: qualityLevels[audioQuality]
-        }
-      }
-    };
+    return qualityLevels[audioQuality];
   };
   
   return (
@@ -187,7 +201,9 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
             onEnded={() => setIsPlaying(false)}
             width="0"
             height="0"
-            config={getPlayerConfig()}
+            config={{
+              youtube: getPlayerConfig()
+            }}
           />
         </div>
       )}
