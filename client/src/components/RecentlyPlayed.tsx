@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getRecentTracks } from "@/lib/youtube";
+import { getRecentTracks } from "@/lib/youtubeApiWrapper";
 import { useContext } from "react";
 import { PlayerContext } from "@/context/PlayerContext";
 import { Track } from "@shared/schema";

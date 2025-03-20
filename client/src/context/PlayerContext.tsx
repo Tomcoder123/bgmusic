@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import { AudioQuality } from "@shared/schema";
 import ReactPlayer from "react-player/youtube";
-import { getUserPreferences, addRecentTrack } from "@/lib/youtube";
+import { getUserPreferences, addRecentTrack } from "@/lib/youtubeApiWrapper";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useBackgroundMode } from "@/hooks/useBackgroundMode";

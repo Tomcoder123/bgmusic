@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchYouTubeVideos } from "@/lib/youtube";
+import { searchYouTubeVideos } from "@/lib/youtubeApiWrapper";
 import { Music2, SearchX } from "lucide-react";
 import { useContext } from "react";
 import { PlayerContext } from "@/context/PlayerContext";
