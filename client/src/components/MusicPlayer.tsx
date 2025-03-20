@@ -4,12 +4,15 @@ import {
   Pause, Play, SkipBack, SkipForward, 
   Volume1, Volume2, VolumeX, 
   Heart, ListMusic, MonitorSpeaker,
-  Repeat, Shuffle
+  Repeat, Shuffle, Info
 } from "lucide-react";
 import { formatDuration } from "@/lib/youtube";
 import { useMutation } from "@tanstack/react-query";
 import { updateVolume } from "@/lib/youtube";
 import { queryClient } from "@/lib/queryClient";
+import { Capacitor } from "@capacitor/core";
+import { useBackgroundMode } from "@/hooks/useBackgroundMode";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function MusicPlayer() {
   const { 
@@ -25,6 +28,7 @@ export default function MusicPlayer() {
     seekTo,
   } = useContext(PlayerContext);
   
+  const { isBackgroundModeEnabled } = useBackgroundMode();
   const progressRef = useRef<HTMLDivElement>(null);
   const volumeBarRef = useRef<HTMLDivElement>(null);
   
@@ -139,6 +143,31 @@ export default function MusicPlayer() {
           <button className="text-muted-foreground hover:text-foreground transition-colors">
             <ListMusic size={18} />
           </button>
+          
+          {/* Background mode info */}
+          {Capacitor.isNativePlatform() && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    className={`text-muted-foreground hover:text-foreground transition-colors ${
+                      isBackgroundModeEnabled ? "text-green-500" : ""
+                    }`}
+                  >
+                    <Info size={18} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    {isBackgroundModeEnabled 
+                      ? "Background mode is active! Music will continue playing when app is minimized." 
+                      : "Start playing music to activate background mode. Music will continue when app is minimized."}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
           <button className="text-muted-foreground hover:text-foreground transition-colors">
             <MonitorSpeaker size={18} />
           </button>

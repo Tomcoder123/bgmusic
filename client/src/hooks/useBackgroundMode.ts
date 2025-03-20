@@ -1,14 +1,17 @@
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { BackgroundMode } from '@anuradev/capacitor-background-mode';
 import { Capacitor } from '@capacitor/core';
 
 export function useBackgroundMode() {
+  const [isBackgroundModeEnabled, setIsBackgroundModeEnabled] = useState(false);
+  
   // Initialize and enable background mode when needed
   const enableBackgroundMode = useCallback(async () => {
     try {
       // Only enable in native app environments
       if (Capacitor.isNativePlatform()) {
         await BackgroundMode.enable();
+        setIsBackgroundModeEnabled(true);
         console.log('Background mode enabled');
       }
     } catch (error) {
@@ -21,6 +24,7 @@ export function useBackgroundMode() {
     try {
       if (Capacitor.isNativePlatform()) {
         await BackgroundMode.disable();
+        setIsBackgroundModeEnabled(false);
         console.log('Background mode disabled');
       }
     } catch (error) {
@@ -34,6 +38,7 @@ export function useBackgroundMode() {
       if (Capacitor.isNativePlatform()) {
         // Different method for updating notification text
         await BackgroundMode.enable();
+        setIsBackgroundModeEnabled(true);
         console.log('Updated background notification with track:', title, artist);
       }
     } catch (error) {
@@ -54,8 +59,39 @@ export function useBackgroundMode() {
       return false;
     }
   }, []);
+
+  // Update the background mode status periodically
+  useEffect(() => {
+    let isMounted = true;
+    
+    // Status check function
+    const checkStatus = async () => {
+      if (!isMounted) return;
+      
+      try {
+        const status = await checkBackgroundMode();
+        if (isMounted) {
+          setIsBackgroundModeEnabled(status);
+        }
+      } catch (error) {
+        console.error('Error checking background mode:', error);
+      }
+    };
+    
+    // Initial check
+    checkStatus();
+    
+    // Set up interval to check status
+    const intervalId = setInterval(checkStatus, 2000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [checkBackgroundMode]);
   
   return {
+    isBackgroundModeEnabled,
     enableBackgroundMode,
     disableBackgroundMode,
     updateBackgroundNotification,
